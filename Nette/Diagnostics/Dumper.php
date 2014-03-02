@@ -44,6 +44,11 @@ class Dumper
 		'curl' => 'curl_getinfo',
 	);
 
+	/** @var array List of API documentations, key is prefix of namespace of class, value is url of documentation */
+	public static $apiDocumentations = array(
+		'Nette' => 'http://api.nette.org/2.1.1/',
+	);
+
 
 	/**
 	 * Dumps variable to the output.
@@ -218,9 +223,10 @@ class Dumper
 
 		static $list = array();
 		$rc = $var instanceof \Closure ? new \ReflectionFunction($var) : new \ReflectionClass($var);
+		$prefix = ($i = strpos(get_class($var), '\\')) !== FALSE ? substr(get_class($var), 0, $i) : NULL;
 		$out = '<span class="nette-dump-object"'
 			. ($rc->getFileName() ? ' data-nette-href="' . htmlspecialchars(strtr(Debugger::$editor, array('%file' => rawurlencode($rc->getFileName()), '%line' => $rc->getStartLine()))) . '"' : '')
-			. '>' . get_class($var) . '</span> <span class="nette-dump-hash">#' . substr(md5(spl_object_hash($var)), 0, 4) . '</span>';
+			. '>' . get_class($var) . '</span> <span class="nette-dump-hash">#' . substr(md5(spl_object_hash($var)), 0, 4) . '</span>' . (isset($prefix, self::$apiDocumentations[$prefix]) ? '&nbsp;<a href="' . self::$apiDocumentations[$prefix] . str_replace('\\', '.', get_class($var)) . '.html">API</a>' : '');
 
 		if (empty($fields)) {
 			return $out . "\n";
